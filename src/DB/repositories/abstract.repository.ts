@@ -1,4 +1,4 @@
-import { FilterQuery, Model, SortOrder, UpdateQuery } from 'mongoose';
+import { FilterQuery, Model, UpdateQuery } from 'mongoose';
 
 export interface IPaginate {
   page: number;
@@ -13,12 +13,7 @@ export type finderOneArg<TDocument> = {
 
 export type findersArg<TDocument> = finderOneArg<TDocument> & {
   paginate?: IPaginate;
-  sort?:
-    | string
-    | { [key: string]: SortOrder | { $meta: any } }
-    | [string, SortOrder][]
-    | null
-    | undefined;
+  sort?: any;
 };
 
 export type updateArg<TDocument> = {

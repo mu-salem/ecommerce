@@ -1,7 +1,4 @@
-import {
-  ConflictException,
-  Injectable,
-} from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { AbstractRepository } from './abstract.repository';
 import { UserDocument, UserModelName } from '../Models/user.model';
 import { InjectModel } from '@nestjs/mongoose';
@@ -19,7 +16,7 @@ export class UserRepository extends AbstractRepository<UserDocument> {
       throw new ConflictException({
         message: 'User already exists',
         details: {
-          email: data.email, 
+          email: data.email,
         },
       });
     }

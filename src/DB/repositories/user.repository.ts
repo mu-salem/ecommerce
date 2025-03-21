@@ -1,4 +1,7 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+} from '@nestjs/common';
 import { AbstractRepository } from './abstract.repository';
 import { UserDocument, UserModelName } from '../Models/user.model';
 import { InjectModel } from '@nestjs/mongoose';
@@ -12,11 +15,14 @@ export class UserRepository extends AbstractRepository<UserDocument> {
 
   async checkDuplicateAccount(data: FilterQuery<UserDocument>) {
     const checkUser = await this.findOne({ filter: data });
-    if (checkUser)
-      throw new HttpException(
-        'User already exists with the provided data',
-        HttpStatus.CONFLICT,
-      );
+    if (checkUser) {
+      throw new ConflictException({
+        message: 'User already exists',
+        details: {
+          email: data.email, 
+        },
+      });
+    }
     return null;
   }
 }

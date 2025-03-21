@@ -68,23 +68,25 @@ export abstract class AbstractRepository<TDocument> {
     return await this.model.create({ ...document });
   }
 
-  //   async update({
-  //     filter,
-  //     update,
-  //     populate,
-  //     select,
-  //   }: updateArg<TDocument>): Promise<TDocument | null> {
-  //     let query = await this.model.findOneAndUpdate(filter, update, {
-  //       new: true,
-  //       runValidators: true,
-  //     });
-  //     if (populate) query = query.populate(populate);
-  //     if (select) query = query.select(select);
-  //     return await query.exec();
-  //   }
+  async update({
+    filter,
+    update,
+    populate,
+    select,
+  }: updateArg<TDocument>): Promise<TDocument | null> {
+    let query = this.model.findOneAndUpdate(filter, update, {
+      new: true,
+      runValidators: true,
+    });
 
-  //   async delete(filter: FilterQuery<TDocument>): Promise<TDocument | null> {
-  //     const query = await this.model.findOneAndDelete(filter);
-  //     return query.exec();
-  //   }
+    if (populate) query = query.populate(populate);
+    if (select) query = query.select(select);
+
+    return await query.exec();
+  }
+
+  async delete(filter: FilterQuery<TDocument>): Promise<TDocument | null> {
+    const query = this.model.findOneAndDelete(filter);
+    return await query.exec();
+  }
 }

@@ -30,22 +30,23 @@ export abstract class AbstractRepository<TDocument> {
     filter = {},
     populate,
     select,
-    paginate,
+    // paginate,
     sort,
-  }: findersArg<TDocument>): Promise<TDocument[]> {
+  }: findersArg<TDocument>): Promise<TDocument[] | any> {
     let query = this.model.find(filter);
     if (populate) query = query.populate(populate);
     if (select) query = query.select(select);
 
-    if (paginate) {
-      const page = Math.max(1, paginate.page || 1);
-      const limit = paginate.limit && paginate.limit > 0 ? paginate.limit : 10;
-      const skip = (page - 1) * limit;
-      query = query.skip(skip).limit(limit);
-    }
+    // if (paginate) {
+    //   const page = Math.max(1, paginate.page || 1);
+    //   const limit = paginate.limit && paginate.limit > 0 ? paginate.limit : 10;
+    //   const skip = (page - 1) * limit;
+    //   query = query.skip(skip).limit(limit);
+    // }
 
     if (sort) query = query.sort(sort);
-    return await query.exec();
+    const data = await query.exec();
+    return { data };
   }
 
   async findOne({

@@ -5,19 +5,15 @@ import {
   IsString,
   ValidateIf,
 } from 'class-validator';
+import { CreateUserDto } from 'src/modules/user/dto/create-user.dto';
 
-export class CreateUserDto {
-  @IsString()
-  @IsNotEmpty()
-  firstName: string;
-
-  @IsString()
-  @IsNotEmpty()
-  lastName: string;
-
+export class ResetPasswordDto {
   @IsString()
   @IsEmail()
   email: string;
+
+  @IsString()
+  otp: string;
 
   @IsString()
   @IsNotEmpty()
@@ -27,7 +23,4 @@ export class CreateUserDto {
   @IsIn([Math.random], { message: 'Password must match!' })
   @ValidateIf((obj: CreateUserDto) => obj.password !== obj.confirmPassword)
   confirmPassword: string;
-
-  @IsString()
-  otp: string;
 }

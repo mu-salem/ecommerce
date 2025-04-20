@@ -7,10 +7,21 @@ import { OTPRepository } from 'src/DB/repositories/otp.repository';
 import { OTPModel } from 'src/DB/Models/otp.model';
 import { TokenRepository } from 'src/DB/repositories/token.repository';
 import { TokenModel } from 'src/DB/Models/token.model';
+import { APP_GUARD } from '@nestjs/core';
+import { AuthenticationGuard } from 'src/common/gurads/authentication.gurad';
 
 @Module({
   imports: [UserModule, OTPModel, TokenModel],
-  controllers: [AuthController, JwtService, OTPRepository, TokenRepository],
-  providers: [AuthService],
+  controllers: [AuthController],
+  providers: [
+    AuthService,
+    JwtService,
+    OTPRepository,
+    TokenRepository,
+    {
+      provide: APP_GUARD,
+      useClass: AuthenticationGuard,
+    },
+  ],
 })
 export class AuthModule {}

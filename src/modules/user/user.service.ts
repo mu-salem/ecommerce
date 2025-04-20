@@ -25,4 +25,6 @@ export class UserService {
     const user = await this._UserRepository.findOne({ filter: { email } });
     return user;
   }
+
+  async profile() {}
 }

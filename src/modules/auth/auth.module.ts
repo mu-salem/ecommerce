@@ -9,6 +9,7 @@ import { TokenRepository } from 'src/DB/repositories/token.repository';
 import { TokenModel } from 'src/DB/Models/token.model';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthenticationGuard } from 'src/common/gurads/authentication.gurad';
+import { RolesGuard } from 'src/common/gurads/authorization.gurad';
 
 @Module({
   imports: [UserModule, OTPModel, TokenModel],
@@ -21,6 +22,10 @@ import { AuthenticationGuard } from 'src/common/gurads/authentication.gurad';
     {
       provide: APP_GUARD,
       useClass: AuthenticationGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
     },
   ],
 })

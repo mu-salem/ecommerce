@@ -2,12 +2,18 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
-import { AuthenticationGuard } from './common/gurads/authentication.gurad';
+import { ResponseMapInterceptor } from './common/interceptor/response-map.interceptor';
+import { ErrorHandlerInterceptor } from './common/interceptor/error-handler.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(
     new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }),
+  );
+
+  app.useGlobalInterceptors(
+    new ResponseMapInterceptor(),
+    new ErrorHandlerInterceptor(),
   );
 
   const configService = app.get<ConfigService>(ConfigService);

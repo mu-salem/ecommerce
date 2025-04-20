@@ -6,6 +6,8 @@ import {
   Patch,
   Param,
   Delete,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
@@ -14,6 +16,7 @@ import { Roles } from 'src/common/decorators/roles.decorator';
 import { Role } from 'src/DB/enums/user.enum';
 import { User } from 'src/common/decorators/user.decorator';
 import { Types } from 'mongoose';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('category')
 export class CategoryController {
@@ -21,8 +24,13 @@ export class CategoryController {
 
   @Post()
   @Roles(Role.ADMIN)
-  create(@Body() data: CreateCategoryDto, @User('_id') userId: Types.ObjectId) {
-    return this.categoryService.create(data);
+  @UseInterceptors(FileInterceptor('image'))
+  create(
+    @Body() data: CreateCategoryDto,
+    @User('_id') userId: Types.ObjectId,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    return this.categoryService.create(data, userId, file);
   }
 
   @Get()

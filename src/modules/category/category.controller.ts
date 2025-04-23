@@ -33,6 +33,27 @@ export class CategoryController {
     return this.categoryService.create(data, userId, file);
   }
 
+  @Roles(Role.ADMIN)
+  @Patch(':id')
+  async update(
+    @Param('id') categoryId: Types.ObjectId,
+    @Body() data: UpdateCategoryDto,
+    @User('_id') userId: Types.ObjectId,
+  ) {
+    return this.categoryService.update(categoryId, data, userId);
+  }
+
+  @Roles(Role.ADMIN)
+  @Patch(':id/image')
+  @UseInterceptors(FileInterceptor('image'))
+  async updateImage(
+    @Param('id') categoryId: Types.ObjectId,
+    @User('_id') userId: Types.ObjectId,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    return this.categoryService.updateImage(categoryId, file, userId);
+  }
+
   @Get()
   findAll() {
     return this.categoryService.findAll();
@@ -41,14 +62,6 @@ export class CategoryController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.categoryService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateCategoryDto: UpdateCategoryDto,
-  ) {
-    return this.categoryService.update(+id, updateCategoryDto);
   }
 
   @Delete(':id')

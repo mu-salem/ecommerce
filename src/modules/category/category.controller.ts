@@ -8,6 +8,8 @@ import {
   Delete,
   UseInterceptors,
   UploadedFile,
+  Query,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
@@ -17,6 +19,8 @@ import { Role } from 'src/DB/enums/user.enum';
 import { User } from 'src/common/decorators/user.decorator';
 import { Types } from 'mongoose';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { ParseObjectIdPipe } from '@nestjs/mongoose';
+import { Public } from 'src/common/decorators/public.decorator';
 
 @Controller('category')
 export class CategoryController {
@@ -36,7 +40,7 @@ export class CategoryController {
   @Roles(Role.ADMIN)
   @Patch(':id')
   async update(
-    @Param('id') categoryId: Types.ObjectId,
+    @Param('id', ParseObjectIdPipe) categoryId: Types.ObjectId,
     @Body() data: UpdateCategoryDto,
     @User('_id') userId: Types.ObjectId,
   ) {
@@ -47,25 +51,30 @@ export class CategoryController {
   @Patch(':id/image')
   @UseInterceptors(FileInterceptor('image'))
   async updateImage(
-    @Param('id') categoryId: Types.ObjectId,
+    @Param('id', ParseObjectIdPipe) categoryId: Types.ObjectId,
     @User('_id') userId: Types.ObjectId,
     @UploadedFile() file: Express.Multer.File,
   ) {
     return this.categoryService.updateImage(categoryId, file, userId);
   }
 
-  @Get()
-  findAll() {
-    return this.categoryService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.categoryService.findOne(+id);
-  }
-
+  @Roles(Role.ADMIN)
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.categoryService.remove(+id);
+  async remove(
+    @Param('id', ParseObjectIdPipe) categoryId: Types.ObjectId,
+    @User('_id') userId: Types.ObjectId,
+  ) {
+    return this.categoryService.remove(categoryId, userId);
+  }
+
+  @Public()
+  @Get(':id')
+  async findOne(@Param('id', ParseObjectIdPipe) categoryId: Types.ObjectId) {
+    return this.categoryService.findOne(categoryId);
+  }
+  @Public()
+  @Get()
+  async findAll(@Query('page', ParseIntPipe) page: number) {
+    return this.categoryService.findAll(page);
   }
 }

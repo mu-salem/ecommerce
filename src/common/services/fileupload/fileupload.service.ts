@@ -39,4 +39,22 @@ export class FileUploadService {
     }
     return saveFiles;
   }
+
+  async deleteFiles(publicIds: string[]) {
+    await this.cloudinary.api.delete_resources(publicIds);
+  }
+
+  async deleteFolder(folderPath: string) {
+    await this.cloudinary.api.delete_resources_by_prefix(folderPath);
+
+    const subFolders = await this.cloudinary.api.sub_folders(folderPath);
+
+    if (subFolders.folders.length) {
+      for (const subFolder of subFolders.folders) {
+        await this.deleteFolder(subFolder.path);
+      }
+    }
+
+    await this.cloudinary.api.delete_folder(folderPath);
+  }
 }

@@ -79,15 +79,34 @@ export class CategoryService {
     return { data: category };
   }
 
-  findAll() {
-    return `This action returns all category`;
+  async remove(categoryId: Types.ObjectId, userId: Types.ObjectId) {
+    const category = await this._CategoryRepository.findOne({
+      filter: { _id: categoryId },
+    });
+    if (!category)
+      throw new NotFoundException(`Category with id ${categoryId} not found!`);
+
+    await category.deleteOne();
+
+    return { massage: 'Category deleted' };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} category`;
+  async findOne(categoryId: Types.ObjectId) {
+    const category = await this._CategoryRepository.findOne({
+      filter: { _id: categoryId },
+    });
+    if (!category)
+      throw new NotFoundException(`Category with id ${categoryId} not found!`);
+
+    return { data: category };
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} category`;
+  async findAll(page: number) {
+    return {
+      data: await this._CategoryRepository.findAll({
+        populate: [{ path: 'createdBy' }],
+        paginate: { page },
+      }),
+    };
   }
 }

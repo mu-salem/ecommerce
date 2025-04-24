@@ -9,6 +9,9 @@ import { HydratedDocument, Types } from 'mongoose';
 import { UserModelName } from './user.model';
 import { Image } from 'src/common/types/image.type';
 import slugify from 'slugify';
+import { FileUploadService } from 'src/common/services/fileupload/fileupload.service';
+import { ConfigService } from '@nestjs/config';
+import { FileUploadModule } from 'src/common/services/fileupload/fileupload.module';
 
 @Schema({ timestamps: true })
 export class Category {
@@ -38,17 +41,41 @@ export class Category {
 
 export const CategorySchema = SchemaFactory.createForClass(Category);
 
-CategorySchema.pre('save', function (next) {
-  if (this.isModified('neme')) {
-    this.slug = slugify(this.name, { lower: true });
-  }
-  return next();
-});
-
 export const CategoryModelName = Category.name;
 
-export const CategoryModel = MongooseModule.forFeature([
-  { name: CategoryModelName, schema: CategorySchema },
+// export const CategoryModel = MongooseModule.forFeature([
+//   { name: CategoryModelName, schema: CategorySchema },
+// ]);
+
+export const CategoryModel = MongooseModule.forFeatureAsync([
+  {
+    name: CategoryModelName,
+    useFactory: (
+      configService: ConfigService,
+      fileUploadService: FileUploadService,
+    ) => {
+      CategorySchema.pre('save', function (next) {
+        if (this.isModified('neme')) {
+          this.slug = slugify(this.name, { lower: true });
+        }
+        return next();
+      });
+      CategorySchema.post(
+        'deleteOne',
+        { document: true, query: false },
+        async function (doc, next) {
+          const catagoryFolder = doc.cloudFolder;
+          const rootFolder = configService.get<string>('CLOUD_FOLDER_NAME');
+          await fileUploadService.deleteFolder(
+            `${rootFolder}/category/${catagoryFolder}`,
+          );
+        },
+      );
+      return CategorySchema;
+    },
+    inject: [ConfigService, FileUploadService],
+    imports: [FileUploadModule],
+  },
 ]);
 
 export type CategoryDocument = HydratedDocument<Category>;

@@ -1,9 +1,15 @@
 import { Module } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { ProductController } from './product.controller';
+import { ProductRepository } from 'src/DB/repositories/Product.repository';
+import { ProductModel } from 'src/DB/Models/product.model';
+import { CategoryModule } from '../category/category.module';
+import { FileUploadModule } from 'src/common/services/fileupload/fileupload.module';
 
 @Module({
   controllers: [ProductController],
-  providers: [ProductService],
+  providers: [ProductService, ProductRepository],
+  imports: [ProductModel, CategoryModule, FileUploadModule],
+  exports: [ProductRepository, ProductService],
 })
 export class ProductModule {}

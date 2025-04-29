@@ -10,6 +10,8 @@ import { UserModelName } from './user.model';
 import { Image } from 'src/common/types/image.type';
 import slugify from 'slugify';
 import { CategoryModelName } from './category.model';
+import { FileUploadService } from './../../common/services/fileupload/fileupload.service';
+import { FileUploadModule } from 'src/common/services/fileupload/fileupload.module';
 
 @Schema({ timestamps: true })
 export class Product {
@@ -31,9 +33,6 @@ export class Product {
   @Prop({ type: Types.ObjectId, ref: UserModelName, required: true })
   createdBy: Types.ObjectId;
 
-  @Prop({ type: Types.ObjectId, ref: UserModelName, required: true })
-  updatedBy: Types.ObjectId;
-
   @Prop(raw({ secure_url: String, public_id: String }))
   thumbnail: Image;
 
@@ -54,21 +53,15 @@ export class Product {
 
   @Prop({
     type: Number,
-    required: true,
     min: 0,
     max: 100,
-    set: function (value: number) {
-      this.finalPrice = this.price - (this.price * value) / 100;
-      return value;
-    },
   })
   discount: number;
 
   @Prop({
     type: Number,
-    required: true,
     default: function () {
-      return this.price;
+      return this.price - (this.price * this.discount || 0) / 100;
     },
   })
   finalPrice: number;
@@ -81,8 +74,26 @@ export const ProductSchema = SchemaFactory.createForClass(Product);
 
 export const ProductModelName = Product.name;
 
-export const ProductModel = MongooseModule.forFeature([
-  { name: ProductModelName, schema: ProductSchema },
+// export const ProductModel = MongooseModule.forFeature([
+//   { name: ProductModelName, schema: ProductSchema },
+// ]);
+
+export const ProductModel = MongooseModule.forFeatureAsync([
+  {
+    name: ProductModelName,
+    useFactory: (fileUploadService: FileUploadService) => {
+      ProductSchema.post(
+        'deleteOne',
+        { document: true, query: false },
+        async function (doc, next) {
+          await fileUploadService.deleteFolder(`${doc.cloudFolder}`);
+        },
+      );
+      return ProductSchema;
+    },
+    inject: [FileUploadService],
+    imports: [FileUploadModule],
+  },
 ]);
 
 export type ProductDocument = HydratedDocument<Product>;

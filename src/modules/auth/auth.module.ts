@@ -10,9 +10,10 @@ import { TokenModel } from 'src/DB/Models/token.model';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthenticationGuard } from 'src/common/gurads/authentication.gurad';
 import { RolesGuard } from 'src/common/gurads/authorization.gurad';
+import { CartModule } from '../cart/cart.module';
 
 @Module({
-  imports: [UserModule, OTPModel, TokenModel],
+  imports: [UserModule, OTPModel, TokenModel, CartModule],
   controllers: [AuthController],
   providers: [
     AuthService,

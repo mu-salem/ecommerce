@@ -12,7 +12,7 @@ export type finderOneArg<TDocument> = {
 
 export type findersArg<TDocument> = finderOneArg<TDocument> & {
   paginate?: IPaginate;
-  sort?: any;
+  sort?: Record<string, -1 | 1>;
 };
 
 export type updateArg<TDocument> = {
@@ -37,23 +37,18 @@ export abstract class AbstractRepository<TDocument> {
     if (select) query = query.select(select);
     if (sort) query = query.sort(sort);
 
-    if (paginate?.page) {
-      const { page } = paginate;
-      const limit = 10;
-      const skip = (page - 1) * limit;
-      const totalSize = await query.model.countDocuments(query.getQuery());
-      const data = await query.skip(skip).limit(limit).exec();
-      return {
-        totalSize,
-        totalPages: Math.ceil(totalSize / limit),
-        pageSize: data.length,
-        pageNumber: page,
-        data,
-      };
-    }
-
-    const data = await query.exec();
-    return { data };
+    const page = paginate?.page ?? 1;
+    const limit = 10;
+    const skip = (page - 1) * limit;
+    const totalSize = await query.model.countDocuments(query.getQuery());
+    const data = await query.skip(skip).limit(limit).exec();
+    return {
+      totalSize,
+      totalPages: Math.ceil(totalSize / limit),
+      pageSize: data.length,
+      pageNumber: page,
+      data,
+    };
   }
 
   async findOne({

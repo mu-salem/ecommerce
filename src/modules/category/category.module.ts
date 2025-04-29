@@ -15,5 +15,6 @@ import { CategoryModel } from 'src/DB/Models/category.model';
     FileUploadService,
     CloudinaryProvider,
   ],
+  exports: [CategoryRepository],
 })
 export class CategoryModule {}

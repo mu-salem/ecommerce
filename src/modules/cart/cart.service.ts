@@ -21,12 +21,7 @@ export class CartService {
   async addToCart(data: CartDto, userId: Types.ObjectId) {
     const { productId, quantity } = data;
 
-    const product = await this._ProductRepository.findOne({
-      filter: { _id: productId },
-    });
-
-    if (!product)
-      throw new NotFoundException(`Product with id ${productId} not found!`);
+    const product = await this._ProductService.checkProductExistence(productId);
 
     if (!this._ProductService.inStock(product, quantity))
       throw new BadRequestException(
@@ -99,5 +94,9 @@ export class CartService {
     });
 
     return { data: cart };
+  }
+
+  async getCart(userId: Types.ObjectId) {
+    return this._CartRepository.findOne({ filter: { user: userId } });
   }
 }

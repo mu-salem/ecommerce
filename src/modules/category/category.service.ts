@@ -6,7 +6,6 @@ import { FileUploadService } from 'src/common/services/fileupload/fileupload.ser
 import { ConfigService } from '@nestjs/config';
 import { v4 as uuidv4 } from 'uuid';
 import { CategoryRepository } from 'src/DB/repositories/category.repository';
-import { Public } from 'src/common/decorators/public.decorator';
 
 @Injectable()
 export class CategoryService {

@@ -12,9 +12,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { FileUploadService } from 'src/common/services/fileupload/fileupload.service';
 import { ConfigService } from '@nestjs/config';
 import { Image } from 'src/common/types/image.type';
-import { RemoveImageDto } from './dto/remove-image.dto';
 import { FindProductDto } from './dto/find-product.dto';
 import { ProductDocument } from 'src/DB/Models/product.model';
+import { StockGateway } from '../socket/stock.gateway';
 @Injectable()
 export class ProductService {
   constructor(
@@ -22,6 +22,7 @@ export class ProductService {
     private readonly _CategoryRepository: CategoryRepository,
     private readonly _FileUploadService: FileUploadService,
     private readonly _ConfigService: ConfigService,
+    private readonly _StockGateway: StockGateway,
   ) {}
   async create(
     userId: Types.ObjectId,
@@ -216,7 +217,33 @@ export class ProductService {
     return { data: products };
   }
 
+  async checkProductExistence(productId: Types.ObjectId) {
+    const product = await this._ProductRepository.findOne({
+      filter: { _id: productId },
+    });
+
+    if (!product)
+      throw new NotFoundException(`Product with id ${productId} not found!`);
+
+    return product;
+  }
+
   inStock(product: ProductDocument, requiredQuantity: number) {
     return product.stock >= requiredQuantity ? true : false;
+  }
+
+  async updateStock(
+    productId: Types.ObjectId,
+    quantity: number,
+    increment: boolean,
+  ) {
+    const product = await this._ProductRepository.update({
+      filter: { _id: productId },
+      update: { $inc: { stock: increment ? quantity : -quantity } },
+    });
+
+    this._StockGateway.broadcastStockUpdate(product!._id, product!.stock);
+
+    return product;
   }
 }

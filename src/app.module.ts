@@ -10,6 +10,11 @@ import { CategoryModule } from './modules/category/category.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { ProductModule } from './modules/product/product.module';
 import { CartModule } from './modules/cart/cart.module';
+import { OrderModule } from './modules/order/order.module';
+import { BrandModule } from './modules/brand/brand.module';
+import { SubcategoryModule } from './modules/subcategory/subcategory.module';
+import { CouponModule } from './modules/coupon/coupon.module';
+import { ReviewModule } from './modules/review/review.module';
 
 @Module({
   imports: [
@@ -40,6 +45,11 @@ import { CartModule } from './modules/cart/cart.module';
     CategoryModule,
     ProductModule,
     CartModule,
+    OrderModule,
+    BrandModule,
+    SubcategoryModule,
+    CouponModule,
+    ReviewModule,
   ],
   controllers: [AppController],
   providers: [AppService],

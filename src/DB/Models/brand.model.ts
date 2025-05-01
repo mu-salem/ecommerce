@@ -12,14 +12,15 @@ import slugify from 'slugify';
 import { FileUploadService } from 'src/common/services/fileupload/fileupload.service';
 import { ConfigService } from '@nestjs/config';
 import { FileUploadModule } from 'src/common/services/fileupload/fileupload.module';
+import { SubCategoryModelName } from './subCategory.model';
 
 @Schema({ timestamps: true })
-export class Category {
+export class Brand {
   @Prop({
     type: String,
     required: true,
     unique: true,
-    index: { name: 'category_name_index' },
+    index: { name: 'Brand_name_index' },
   })
   name: string;
 
@@ -37,45 +38,48 @@ export class Category {
 
   @Prop({ type: String })
   cloudFolder: string;
+
+  @Prop({ type: Types.ObjectId, ref: SubCategoryModelName, required: true })
+  subCategory: Types.ObjectId;
 }
 
-export const CategorySchema = SchemaFactory.createForClass(Category);
+export const BrandSchema = SchemaFactory.createForClass(Brand);
 
-export const CategoryModelName = Category.name;
+export const BrandModelName = Brand.name;
 
-// export const CategoryModel = MongooseModule.forFeature([
-//   { name: CategoryModelName, schema: CategorySchema },
+// export const BrandModel = MongooseModule.forFeature([
+//   { name: BrandModelName, schema: BrandSchema },
 // ]);
 
-export const CategoryModel = MongooseModule.forFeatureAsync([
+export const BrandModel = MongooseModule.forFeatureAsync([
   {
-    name: CategoryModelName,
+    name: BrandModelName,
     useFactory: (
       configService: ConfigService,
       fileUploadService: FileUploadService,
     ) => {
-      CategorySchema.pre('save', function (next) {
+      BrandSchema.pre('save', function (next) {
         if (this.isModified('name')) {
           this.slug = slugify(this.name, { lower: true });
         }
         return next();
       });
-      CategorySchema.post(
+      BrandSchema.post(
         'deleteOne',
         { document: true, query: false },
         async function (doc, next) {
           const catagoryFolder = doc.cloudFolder;
           const rootFolder = configService.get<string>('CLOUD_FOLDER_NAME');
           await fileUploadService.deleteFolder(
-            `${rootFolder}/category/${catagoryFolder}`,
+            `${rootFolder}/Brand/${catagoryFolder}`,
           );
         },
       );
-      return CategorySchema;
+      return BrandSchema;
     },
     inject: [ConfigService, FileUploadService],
     imports: [FileUploadModule],
   },
 ]);
 
-export type CategoryDocument = HydratedDocument<Category>;
+export type BrandDocument = HydratedDocument<Brand>;

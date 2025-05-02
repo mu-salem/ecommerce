@@ -1,10 +1,11 @@
-import { IsMongoId, IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
+import { Types } from 'mongoose';
 
 export class CreateBrandDto {
-  @IsString()
   @IsNotEmpty()
+  @IsString()
   name: string;
 
-  @IsMongoId()
-  subCategory: string;
+  @IsNotEmpty()
+  subCategory: Types.ObjectId;
 }

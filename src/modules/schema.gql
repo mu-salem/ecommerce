@@ -1,0 +1,36 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type oneUserResponse {
+  _id: ID!
+  firstName: String!
+  lastName: String!
+}
+
+type OneOrdersResponse {
+  _id: ID!
+  user: oneUserResponse!
+  phone: String!
+  address: String!
+  orderStatus: String!
+  price: Float!
+  paymentMethod: String!
+  paid: Boolean!
+}
+
+type AllOrdersResponse {
+  totalSize: Int!
+  totalPages: Int!
+  pageSize: Int!
+  pageNumber: Int!
+  data: [OneOrdersResponse!]!
+}
+
+type Query {
+  allOrders(paginate: PaginateInput): AllOrdersResponse!
+}
+
+input PaginateInput {
+  page: Int!
+}

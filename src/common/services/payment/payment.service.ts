@@ -29,4 +29,8 @@ export class PaymentService {
   async createCoupon({ currency, percent_off }: Stripe.CouponCreateParams) {
     return this.stripe.coupons.create({ currency, percent_off });
   }
+
+  async refund({ payment_intent }: Stripe.RefundCreateParams) {
+    return this.stripe.refunds.create({ payment_intent });
+  }
 }

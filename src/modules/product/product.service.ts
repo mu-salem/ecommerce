@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -15,6 +16,8 @@ import { Image } from 'src/common/types/image.type';
 import { FindProductDto } from './dto/find-product.dto';
 import { ProductDocument } from 'src/DB/Models/product.model';
 import { StockGateway } from '../socket/stock.gateway';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 @Injectable()
 export class ProductService {
   constructor(
@@ -23,6 +26,7 @@ export class ProductService {
     private readonly _FileUploadService: FileUploadService,
     private readonly _ConfigService: ConfigService,
     private readonly _StockGateway: StockGateway,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
   async create(
     userId: Types.ObjectId,
@@ -190,6 +194,10 @@ export class ProductService {
   }
 
   async findAll(query: FindProductDto) {
+    const key = `products:${JSON.stringify(query)}`;
+    const chached = await this.cacheManager.get(key);
+    if (chached) return { data: chached };
+
     const products = await this._ProductRepository.findAll({
       filter: {
         ...(query.category && { category: new Types.ObjectId(query.category) }),
@@ -213,6 +221,8 @@ export class ProductService {
       },
       paginate: { page: query.page },
     });
+
+    await this.cacheManager.set(key, products, 50000);
 
     return { data: products };
   }

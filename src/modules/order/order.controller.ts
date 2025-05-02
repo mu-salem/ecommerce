@@ -12,6 +12,11 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { User } from 'src/common/decorators/user.decorator';
 import { UserDocument } from 'src/DB/Models/user.model';
+import { Public } from 'src/common/decorators/public.decorator';
+import { ParseObjectIdPipe } from '@nestjs/mongoose';
+import { Types } from 'mongoose';
+import { Role } from 'src/DB/enums/user.enum';
+import { Roles } from 'src/common/decorators/roles.decorator';
 
 @Controller('order')
 export class OrderController {
@@ -22,23 +27,19 @@ export class OrderController {
     return this.orderService.create(data, user);
   }
 
-  @Get()
-  findAll() {
-    return this.orderService.findAll();
+  @Post('webhook')
+  @Public()
+  async stripeWebhook(@Body() data: any) {
+    this.orderService.stripeWebhook(data);
+    return;
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.orderService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
-    return this.orderService.update(+id, updateOrderDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.orderService.remove(+id);
+  @Roles(Role.USER)
+  @Post('cancel/:id')
+  async cancelOrder(
+    @Param('id', ParseObjectIdPipe) orderId: Types.ObjectId,
+    @User('_id') userId: Types.ObjectId,
+  ) {
+    return this.orderService.cancelOrder(orderId, userId);
   }
 }

@@ -12,6 +12,8 @@ import { Request } from 'express';
 import { TokenRepository } from 'src/DB/repositories/token.repository';
 import { UserRepository } from 'src/DB/repositories/user.repository';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
+import { IS_GRAPHQL } from '../decorators/graphql.decorator';
+import { GqlExecutionContext } from '@nestjs/graphql';
 
 @Injectable()
 export class AuthenticationGuard implements CanActivate {
@@ -29,7 +31,19 @@ export class AuthenticationGuard implements CanActivate {
     ]);
     if (isPublic) return true;
 
-    const request = context.switchToHttp().getRequest();
+    let request;
+    const isGraphql = this.reflector.getAllAndOverride<boolean>(IS_GRAPHQL, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
+    if (isGraphql) {
+      const ctx = GqlExecutionContext.create(context).getContext();
+      request = ctx.req;
+    } else {
+      request = context.switchToHttp().getRequest();
+    }
+
     const token = this.extractTokenFromHeader(request);
     if (!token) throw new UnauthorizedException('No token provided');
 

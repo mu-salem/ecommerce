@@ -14,7 +14,7 @@ async function bootstrap() {
   );
 
   app.useGlobalInterceptors(
-    new ResponseMapInterceptor(),
+    // new ResponseMapInterceptor(),
     new ErrorHandlerInterceptor(),
   );
 

@@ -105,7 +105,17 @@ export class BrandService {
     return {
       data: await this._BrandRepository.findAll({
         paginate: { page },
-        populate: [{ path: 'subCategory' }, { path: 'createdBy' }],
+        populate: [
+          {
+            path: 'subCategory',
+            populate: {
+              path: 'category',
+            },
+          },
+          {
+            path: 'createdBy',
+          },
+        ],
       }),
     };
   }

@@ -23,13 +23,13 @@ export class Category {
   })
   name: string;
 
-  @Prop({ type: String, required: true, unique: true })
+  @Prop({ type: String, unique: true })
   slug: string;
 
   @Prop({ type: Types.ObjectId, ref: UserModelName, required: true })
   createdBy: Types.ObjectId;
 
-  @Prop({ type: Types.ObjectId, ref: UserModelName, required: true })
+  @Prop({ type: Types.ObjectId, ref: UserModelName })
   updatedBy: Types.ObjectId;
 
   @Prop(raw({ secure_url: String, public_id: String }))
@@ -60,17 +60,20 @@ export const CategoryModel = MongooseModule.forFeatureAsync([
         }
         return next();
       });
+
       CategorySchema.post(
         'deleteOne',
         { document: true, query: false },
         async function (doc, next) {
-          const catagoryFolder = doc.cloudFolder;
+          const categoryFolder = doc.cloudFolder;
           const rootFolder = configService.get<string>('CLOUD_FOLDER_NAME');
           await fileUploadService.deleteFolder(
-            `${rootFolder}/category/${catagoryFolder}`,
+            `${rootFolder}/category/${categoryFolder}`,
           );
+          next();
         },
       );
+
       return CategorySchema;
     },
     inject: [ConfigService, FileUploadService],

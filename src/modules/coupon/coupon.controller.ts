@@ -14,6 +14,7 @@ import { Roles } from 'src/common/decorators/roles.decorator';
 import { Role } from 'src/DB/enums/user.enum';
 import { Types } from 'mongoose';
 import { User } from 'src/common/decorators/user.decorator';
+import { ParseObjectIdPipe } from '@nestjs/mongoose';
 
 @Controller('coupon')
 export class CouponController {
@@ -41,7 +42,7 @@ export class CouponController {
   @Roles(Role.ADMIN, Role.USER)
   @Delete(':id')
   async remove(
-    @Param('id') reviewId: Types.ObjectId,
+    @Param('id', ParseObjectIdPipe) reviewId: Types.ObjectId,
     @User('_id') userId: Types.ObjectId,
   ) {
     return this.couponService.remove(reviewId, userId);

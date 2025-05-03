@@ -82,7 +82,7 @@ export class ProductService {
     productId: Types.ObjectId,
     data: UpdateProductDto,
   ) {
-    const product = this._ProductRepository.update({
+    const product = await this._ProductRepository.update({
       filter: { _id: productId, createdBy: userId },
       update: { ...data },
     });
@@ -90,7 +90,7 @@ export class ProductService {
     if (!product)
       throw new NotFoundException(`Product with id ${productId} not found!`);
 
-    return { data: product };
+    return { message: 'Product updated successfully', data: product };
   }
 
   async removeImage(
@@ -190,7 +190,7 @@ export class ProductService {
 
     await product.deleteOne();
 
-    return { data: product };
+    return { message: 'Product deleted successfully' };
   }
 
   async findAll(query: FindProductDto) {
@@ -220,6 +220,7 @@ export class ProductService {
         }),
       },
       paginate: { page: query.page },
+      populate: [{ path: 'category' }, { path: 'createdBy' }],
     });
 
     await this.cacheManager.set(key, products, 50000);

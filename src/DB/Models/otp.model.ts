@@ -16,7 +16,7 @@ export const OTPSchema = SchemaFactory.createForClass(OTP);
 OTPSchema.index({ createdAt: 1 }, { expireAfterSeconds: 120 });
 
 OTPSchema.pre('save', function (next) {
-  if (this.isModified('password')) {
+  if (this.isModified('otp')) {
     this.otp = hash(this.otp);
   }
   return next();

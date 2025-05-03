@@ -1,7 +1,7 @@
 import { FilterQuery, Model, UpdateQuery } from 'mongoose';
 
 export interface IPaginate {
-  page: number;
+  page?: number;
 }
 
 export type finderOneArg<TDocument> = {
@@ -85,6 +85,7 @@ export abstract class AbstractRepository<TDocument> {
 
   async delete(filter: FilterQuery<TDocument>): Promise<TDocument | null> {
     const query = this.model.findOneAndDelete(filter);
+    console.log(filter);
     return await query.exec();
   }
 }

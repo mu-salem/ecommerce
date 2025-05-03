@@ -19,7 +19,7 @@ export class CategoryService {
     userId: Types.ObjectId,
     file: Express.Multer.File,
   ) {
-    const rootFolder = this._configService.get<string>('CLOUD_FOLDER_NAME');
+    const rootFolder = this._configService.get('CLOUD_FOLDER_NAME');
     const cloudFolder = uuidv4();
     const results = await this._FileUploadService.saveFileToCloud([file], {
       folder: `${rootFolder}/category/${cloudFolder}`,
@@ -87,7 +87,7 @@ export class CategoryService {
 
     await category.deleteOne();
 
-    return { massage: 'Category deleted' };
+    return { message: 'Category deleted' };
   }
 
   async findOne(categoryId: Types.ObjectId) {

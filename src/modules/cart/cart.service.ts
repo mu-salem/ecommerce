@@ -23,42 +23,59 @@ export class CartService {
 
     const product = await this._ProductService.checkProductExistence(productId);
 
-    if (!this._ProductService.inStock(product, quantity))
-      throw new BadRequestException(
-        `Sorry only ${product.stock} pieces available in stock!`,
-      );
-
-    const isProductInCart = await this._CartRepository.findOne({
-      filter: { 'products.productId': productId, user: userId },
-    });
-
-    if (isProductInCart) {
-      const theProduct = isProductInCart.products.find(
-        (p) => p.productId.toString() === productId.toString(),
-      );
-
-      if (
-        this._ProductService.inStock(product, theProduct!.quantity + quantity)
-      ) {
-        theProduct!.quantity += quantity;
-        await isProductInCart.save();
-
-        return { data: isProductInCart };
-      }
-    } else {
+    if (!this._ProductService.inStock(product, quantity)) {
       throw new BadRequestException(
         `Sorry only ${product.stock} pieces available in stock!`,
       );
     }
 
-    const cart = await this._CartRepository.update({
+    const existingCart = await this._CartRepository.findOne({
       filter: { user: userId },
-      update: {
-        $push: { products: { productId, quantity, price: product.price } },
-      },
     });
 
-    return { data: cart };
+    if (existingCart) {
+      const existingProduct = existingCart.products.find(
+        (p) => p.productId.toString() === productId.toString(),
+      );
+
+      if (existingProduct) {
+        const newQuantity = existingProduct.quantity + quantity;
+
+        if (!this._ProductService.inStock(product, newQuantity)) {
+          throw new BadRequestException(
+            `Sorry only ${product.stock} pieces available in stock!`,
+          );
+        }
+
+        existingProduct.quantity = newQuantity;
+        await existingCart.save();
+
+        return { data: existingCart };
+      } else {
+        if (!this._ProductService.inStock(product, quantity)) {
+          throw new BadRequestException(
+            `Sorry only ${product.stock} pieces available in stock!`,
+          );
+        }
+
+        existingCart.products.push({
+          productId,
+          quantity,
+          price: product.price,
+        });
+
+        await existingCart.save();
+
+        return { data: existingCart };
+      }
+    }
+
+    const newCart = await this._CartRepository.create({
+      user: userId,
+      products: [{ productId, quantity, price: product.price }],
+    });
+
+    return { data: newCart };
   }
 
   async updateCart(data: CartDto, userId: Types.ObjectId) {

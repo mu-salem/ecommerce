@@ -34,6 +34,7 @@ export class AuthService {
     try {
       const { email, otp } = data;
 
+      console.log({ data });
       const otpDoc = await this._OTPRepository.findOne({ filter: { email } });
       if (!otpDoc || !comparehash(otp, otpDoc.otp))
         throw new NotFoundException('Invalid OTP!');
@@ -46,7 +47,7 @@ export class AuthService {
       });
 
       await this._CartRepository.create({ user: user._id });
-      return { success: true, message: 'User created', results: user };
+      return { success: true, message: 'User created', data: { user } };
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
@@ -100,6 +101,8 @@ export class AuthService {
       if (otp) await otp.deleteOne();
 
       const newOtp = randomstring.generate(6);
+
+      await this._OTPRepository.create({ email, otp: newOtp });
 
       this._MailerService.sendMail({
         to: email,

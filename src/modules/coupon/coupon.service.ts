@@ -47,7 +47,7 @@ export class CouponService {
 
   async remove(couponId: Types.ObjectId, userId: Types.ObjectId) {
     const couponExist = await this._CouponRepository.findOne({
-      filter: { _id: couponId, createdBy: userId },
+      filter: { _id: couponId },
     });
 
     if (!couponExist)
@@ -57,6 +57,6 @@ export class CouponService {
       filter: { _id: couponId, createdBy: userId },
     });
 
-    return { massage: 'Coupon deleted successfully', data: { coupon } };
+    return { message: 'Coupon deleted successfully' };
   }
 }

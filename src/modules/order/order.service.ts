@@ -36,7 +36,7 @@ export class OrderService {
       const product = await this._ProductService.checkProductExistence(
         prd.productId,
       );
-      if (this._ProductService.inStock(product, prd.quantity))
+      if (!this._ProductService.inStock(product, prd.quantity))
         throw new BadRequestException(
           `Sorry only ${product.stock} pieces available in stock!`,
         );

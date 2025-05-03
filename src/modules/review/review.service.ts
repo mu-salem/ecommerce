@@ -5,6 +5,7 @@ import { Types } from 'mongoose';
 import { ReviewRepository } from 'src/DB/repositories/review.repository';
 import { ProductRepository } from 'src/DB/repositories/Product.repository';
 import { ProductService } from '../product/product.service';
+import { console } from 'inspector';
 
 @Injectable()
 export class ReviewService {
@@ -54,16 +55,12 @@ export class ReviewService {
   }
 
   async remove(reviewId: Types.ObjectId, userId: Types.ObjectId) {
-    const reviewExists = await this._ReviewRepository.findOne({
-      filter: { _id: reviewId, createdBy: userId },
-    });
-
-    if (!reviewExists) throw new BadRequestException('Review not found!');
-
     const review = await this._ReviewRepository.delete({
       filter: { _id: reviewId, createdBy: userId },
     });
 
-    return { massage: 'Review deleted successfully' };
+    if (!review) throw new BadRequestException('Review not found!');
+
+    return { message: 'Review deleted successfully' };
   }
 }

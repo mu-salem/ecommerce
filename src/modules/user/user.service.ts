@@ -26,5 +26,9 @@ export class UserService {
     return user;
   }
 
-  async profile() {}
+  async profile() {
+    const user = await this._UserRepository.findOne({ filter: {} });
+
+    return { data: user };
+  }
 }

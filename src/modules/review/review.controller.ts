@@ -14,6 +14,7 @@ import { Roles } from 'src/common/decorators/roles.decorator';
 import { Role } from 'src/DB/enums/user.enum';
 import { User } from 'src/common/decorators/user.decorator';
 import { Types } from 'mongoose';
+import { ParseObjectIdPipe } from '@nestjs/mongoose';
 
 @Controller('review')
 export class ReviewController {
@@ -28,7 +29,7 @@ export class ReviewController {
   @Roles(Role.USER)
   @Patch(':id')
   update(
-    @Param('id') reviewId: Types.ObjectId,
+    @Param('id', ParseObjectIdPipe) reviewId: Types.ObjectId,
     @User('_id') userId: Types.ObjectId,
     @Body() data: UpdateReviewDto,
   ) {
@@ -38,7 +39,7 @@ export class ReviewController {
   @Roles(Role.USER, Role.ADMIN)
   @Delete(':id')
   remove(
-    @Param('id') reviewId: Types.ObjectId,
+    @Param('id', ParseObjectIdPipe) reviewId: Types.ObjectId,
     @User('_id') userId: Types.ObjectId,
   ) {
     return this.reviewService.remove(reviewId, userId);
